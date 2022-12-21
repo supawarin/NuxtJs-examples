@@ -1,0 +1,128 @@
+# .github/workflows/deploy.yml
+name: CD - Helm 1-Click Deploy nuxt-sample1 to an ENV - to Kubernetes
+
+on:
+  push:
+    branches: [ dummy ]
+
+  workflow_dispatch:
+    inputs:
+      ENV_REF:
+        type: choice
+        description: 'Please choose the Target Environment'
+        default: 'test'
+        required: true
+        options:
+        - test
+        - acc
+        - prod
+
+      TARGET_CLUSTER:      
+        type: choice
+        description: 'Please choose the Target K3S Cluster(s)'
+        default: 'k3s3'
+        required: true
+        options:
+        - k3s1
+        - k3s2
+        - k3s3
+        - All
+
+      IMAGE_REGISTRY:
+        type: choice
+        description: 'Please choose docker image registry to push'
+        default: 'registry.workstation.co.uk'
+        required: true
+        options:
+        - docker.io
+        - ghcr.io
+        - registry.workstation.co.uk
+
+      IMAGE_NAME:
+        type: choice
+        description: 'Please choose docker image name to push'
+        default: 'nuxt-sample1'
+        required: true
+        options:
+        - nuxt-sample1
+
+      IMAGE_TAG:
+        type: choice
+        description: 'Please choose docker image tag to push'
+        default: 'latest'
+        required: true
+        options:
+        - latest
+        - stable
+        - prod
+        - acc
+        - test
+        - dev
+        - int
+
+env:
+  TARGET_ENV: ${{ github.event.inputs.ENV_REF }}
+  TARGET_CLUSTER: ${{ github.event.inputs.TARGET_CLUSTER }}
+
+  IMAGE_REGISTRY: ${{ github.event.inputs.IMAGE_REGISTRY }}
+  IMAGE_NAME: ${{ github.event.inputs.IMAGE_NAME }}
+  IMAGE_TAG: ${{ github.event.inputs.IMAGE_TAG }}
+  TARGET_STACK: openresty_php
+
+  # KUBE_CONFIG_DATA_K3S1: ${{ secrets.KUBE_CONFIG_DATA_K3S1 }}
+  # KUBE_CONFIG_DATA_K3S2: ${{ secrets.KUBE_CONFIG_DATA_K3S2 }}
+  # KUBE_CONFIG_DATA_K3S3: ${{ secrets.KUBE_CONFIG_DATA_K3S3 }}
+
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Check out this repo code
+      uses: actions/checkout@v2
+      with:
+        ref: "main"
+
+    - name: Run bash script to perform Cluster kubeconfig mapping
+      run: |
+        if [ "${{ env.TARGET_CLUSTER }}" == "k3s1" ]; then
+          echo "KUBE_CONFIG_DATA=${{ secrets.KUBE_CONFIG_DATA_K3S1 }}" >> $GITHUB_ENV
+        else
+          echo "KUBE_CONFIG_DATA is NOT k3s1"
+        fi
+        if [ "${{ env.TARGET_CLUSTER }}" == "k3s2" ]; then
+          echo "KUBE_CONFIG_DATA=${{ secrets.KUBE_CONFIG_DATA_K3S2 }}" >> $GITHUB_ENV
+        else
+          echo "KUBE_CONFIG_DATA is NOT k3s2"
+        fi
+        if [ "${{ env.TARGET_CLUSTER }}" == "k3s3" ]; then
+          echo "KUBE_CONFIG_DATA=${{ secrets.KUBE_CONFIG_DATA_K3S3 }}" >> $GITHUB_ENV
+        else
+          echo "KUBE_CONFIG_DATA is NOT k3s3"
+        fi
+        echo "Cluster kubeconfig mapping - done!"
+      shell: bash
+
+    # - name: Helm Delete - Release
+    #   uses: koslib/helm-eks-action@master
+    #   with:
+    #     command: helm delete nuxt-sample1-$TARGET_ENV -n $TARGET_ENV
+
+    - name: Helm Deploy - Release
+      uses: koslib/helm-eks-action@master
+      with:
+        command: helm upgrade -i nuxt-sample1-${{ env.TARGET_ENV }} ./devops/nuxt-sample1-chart -f devops/nuxt-sample1-chart/values-${{ env.TARGET_ENV }}-${{ env.TARGET_CLUSTER}}.yaml --set-string targetImage="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}" --set-string targetImageTag="${{ env.IMAGE_TAG }}" --namespace ${{ env.TARGET_ENV }} --create-namespace
+
+
+    - name: Slack Notification for nuxt-sample1 release 
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_CHANNEL: general
+        SLACK_COLOR: ${{ job.status }}
+        SLACK_ICON: https://github.com/rtCamp.png?size=48
+        SLACK_MESSAGE: 'Post Content :rocket:'
+        SLACK_TITLE: Post Title
+        SLACK_USERNAME: rtCamp
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

@@ -84,7 +84,7 @@ jobs:
           IMAGE_REGISTRY=registry.workstation.co.uk
         fi
         if [ -z "${{ env.IMAGE_NAME }}" ]; then
-          IMAGE_NAME=workstation-frontend
+          IMAGE_NAME=nuxt-sample1
         fi
         if [ -z "${{ env.IMAGE_TAG }}" ]; then
           IMAGE_TAG=latest
