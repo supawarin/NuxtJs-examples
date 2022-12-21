@@ -113,7 +113,7 @@ jobs:
     - name: Helm Deploy - Release
       uses: koslib/helm-eks-action@master
       with:
-        command: helm upgrade -i nuxt-sample1-${{ env.TARGET_ENV }} ./app/nuxt-app/devops/nuxt-sample1-chart -f app/nuxt-app/devops/nuxt-sample1-chart/values-${{ env.TARGET_ENV }}-${{ env.TARGET_CLUSTER}}.yaml --set-string targetImage="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}" --set-string targetImageTag="${{ env.IMAGE_TAG }}" --namespace ${{ env.TARGET_ENV }} --create-namespace
+        command: helm upgrade -i nuxt-sample1-${{ env.TARGET_ENV }} ./app/nuxt-app/devops/nuxt-sample1 -f app/nuxt-app/devops/nuxt-sample1/values-${{ env.TARGET_ENV }}-${{ env.TARGET_CLUSTER}}.yaml --set-string targetImage="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}" --set-string targetImageTag="${{ env.IMAGE_TAG }}" --namespace ${{ env.TARGET_ENV }} --create-namespace
 
 
     - name: Slack Notification for nuxt-sample1 release 
