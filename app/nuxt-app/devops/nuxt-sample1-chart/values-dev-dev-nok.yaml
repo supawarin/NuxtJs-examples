@@ -1,9 +1,9 @@
 # Default values for nuxt-sample1.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-targetCluster: k3s3
-targetEnv: test
-targetNS: test
+targetCluster: k3s0
+targetEnv: dev
+targetNS: dev
 targetEnvironment: development
 
 replicaCount: 1
@@ -42,7 +42,7 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
-svcAccessPort: 31200
+svcAccessPort: 30022
 
 service:
   type: ClusterIP
@@ -55,7 +55,7 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: nuxt1.workstation.co.th
+    - host: localhost
       paths:
         - path: /
           pathType: ImplementationSpecific
