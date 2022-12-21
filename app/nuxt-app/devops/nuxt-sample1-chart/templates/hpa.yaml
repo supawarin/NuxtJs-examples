@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "nuxt-sample1-chart.fullname" . }}
+  name: {{ include "nuxt-sample1.fullname" . }}
   labels:
-    {{- include "nuxt-sample1-chart.labels" . | nindent 4 }}
+    {{- include "nuxt-sample1.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "nuxt-sample1-chart.fullname" . }}
+    name: {{ include "nuxt-sample1.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

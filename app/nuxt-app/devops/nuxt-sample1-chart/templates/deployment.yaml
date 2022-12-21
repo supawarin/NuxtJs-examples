@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "nuxt-sample1-chart.fullname" . }}
+  name: {{ include "nuxt-sample1.fullname" . }}
   labels:
-    {{- include "nuxt-sample1-chart.labels" . | nindent 4 }}
+    {{- include "nuxt-sample1.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "nuxt-sample1-chart.selectorLabels" . | nindent 6 }}
+      {{- include "nuxt-sample1.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "nuxt-sample1-chart.selectorLabels" . | nindent 8 }}
+        {{- include "nuxt-sample1.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "nuxt-sample1-chart.serviceAccountName" . }}
+      serviceAccountName: {{ include "nuxt-sample1.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
